@@ -2,94 +2,281 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>ミニ にゃんこバトル</title>
+<title>にゃんこ風タワーディフェンス</title>
 
 <style>
+
 body{
-    text-align:center;
-    background:#f0f0f0;
+    background:#222;
+    color:white;
     font-family:sans-serif;
+    text-align:center;
 }
 
 #game{
     position:relative;
-    width:800px;
-    height:200px;
+    width:900px;
+    height:300px;
     margin:auto;
-    background:#d0f0ff;
-    border:3px solid black;
+    background:#87ceeb;
+    border:4px solid white;
+    overflow:hidden;
 }
 
-.cat{
+.unit{
     position:absolute;
-    left:50px;
-    bottom:20px;
     font-size:40px;
 }
 
-.enemy{
-    position:absolute;
-    right:0;
-    bottom:20px;
-    font-size:40px;
+#ui{
+    margin-top:10px;
 }
 
 button{
-    margin-top:10px;
     font-size:18px;
     padding:10px 20px;
+    margin:5px;
 }
+
+.bar{
+    width:200px;
+    height:20px;
+    background:#444;
+    margin:auto;
+}
+
+.hp{
+    height:100%;
+    background:red;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>ミニ にゃんこバトル</h1>
+<h1>にゃんこバトルHTML</h1>
 
 <div id="game"></div>
 
-<button onclick="spawnCat()">にゃんこ出撃</button>
+<div id="ui">
+
+<div>お金: <span id="money">100</span></div>
+
+<button onclick="spawnCat()">にゃんこ(50)</button>
+<button onclick="spawnTank()">タンク(80)</button>
+
+<div>城HP</div>
+
+<div class="bar">
+<div id="castleHP" class="hp"></div>
+</div>
+
+</div>
 
 <script>
 
-let game = document.getElementById("game");
-let enemies = [];
+const game=document.getElementById("game")
+
+let cats=[]
+let enemies=[]
+
+let money=100
+
+let castle=1000
+
+document.getElementById("castleHP").style.width="100%"
+
+function updateMoney(){
+document.getElementById("money").textContent=money
+}
 
 function spawnCat(){
 
-    let cat = document.createElement("div");
-    cat.className="cat";
-    cat.innerHTML="🐱";
-    game.appendChild(cat);
+if(money<50)return
+
+money-=50
+updateMoney()
+
+let el=document.createElement("div")
+el.className="unit"
+el.innerHTML="🐱"
+
+let unit={
+x:50,
+y:200,
+hp:100,
+atk:10,
+speed:1.2,
+element:el
+}
+
+el.style.left=unit.x+"px"
+el.style.top=unit.y+"px"
+
+game.appendChild(el)
+
+cats.push(unit)
+
+}
+
+function spawnTank(){
+
+if(money<80)return
+
+money-=80
+updateMoney()
+
+let el=document.createElement("div")
+el.className="unit"
+el.innerHTML="🛡️"
+
+let unit={
+x:50,
+y:200,
+hp:300,
+atk:5,
+speed:0.6,
+element:el
+}
+
+el.style.left=unit.x+"px"
+el.style.top=unit.y+"px"
+
+game.appendChild(el)
+
+cats.push(unit)
 
 }
 
 function spawnEnemy(){
 
-    let enemy = document.createElement("div");
-    enemy.className="enemy";
-    enemy.innerHTML="🐶";
+let el=document.createElement("div")
+el.className="unit"
+el.innerHTML="🐶"
 
-    let x = 760;
-    enemy.style.left = x + "px";
-
-    game.appendChild(enemy);
-
-    enemies.push({element:enemy,x:x});
+let enemy={
+x:820,
+y:200,
+hp:120,
+atk:8,
+speed:0.8,
+element:el
 }
 
-setInterval(spawnEnemy,3000);
+el.style.left=enemy.x+"px"
+el.style.top=enemy.y+"px"
+
+game.appendChild(el)
+
+enemies.push(enemy)
+
+}
+
+function moveUnits(){
+
+cats.forEach(cat=>{
+
+let target=enemies[0]
+
+if(target && Math.abs(cat.x-target.x)<40){
+
+target.hp-=cat.atk
+
+if(target.hp<=0){
+
+target.element.remove()
+
+enemies.shift()
+
+money+=30
+updateMoney()
+
+}
+
+}else{
+
+cat.x+=cat.speed
+
+}
+
+cat.element.style.left=cat.x+"px"
+
+})
+
+}
 
 function moveEnemies(){
 
-    enemies.forEach(e=>{
-        e.x -= 2;
-        e.element.style.left = e.x + "px";
-    });
+enemies.forEach(enemy=>{
+
+let target=cats[0]
+
+if(target && Math.abs(enemy.x-target.x)<40){
+
+target.hp-=enemy.atk
+
+if(target.hp<=0){
+
+target.element.remove()
+
+cats.shift()
 
 }
 
-setInterval(moveEnemies,30);
+}else{
+
+enemy.x-=enemy.speed
+
+}
+
+enemy.element.style.left=enemy.x+"px"
+
+if(enemy.x<40){
+
+castle-=enemy.atk
+
+updateCastle()
+
+}
+
+})
+
+}
+
+function updateCastle(){
+
+let percent=castle/1000*100
+
+if(percent<0)percent=0
+
+document.getElementById("castleHP").style.width=percent+"%"
+
+if(castle<=0){
+
+alert("ゲームオーバー")
+
+location.reload()
+
+}
+
+}
+
+function gameLoop(){
+
+moveUnits()
+moveEnemies()
+
+}
+
+setInterval(gameLoop,30)
+
+setInterval(spawnEnemy,4000)
+
+setInterval(()=>{
+money+=10
+updateMoney()
+},2000)
 
 </script>
 
