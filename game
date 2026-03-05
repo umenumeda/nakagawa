@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ミニ にゃんこバトル</title>
+
+<style>
+body{
+    text-align:center;
+    background:#f0f0f0;
+    font-family:sans-serif;
+}
+
+#game{
+    position:relative;
+    width:800px;
+    height:200px;
+    margin:auto;
+    background:#d0f0ff;
+    border:3px solid black;
+}
+
+.cat{
+    position:absolute;
+    left:50px;
+    bottom:20px;
+    font-size:40px;
+}
+
+.enemy{
+    position:absolute;
+    right:0;
+    bottom:20px;
+    font-size:40px;
+}
+
+button{
+    margin-top:10px;
+    font-size:18px;
+    padding:10px 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>ミニ にゃんこバトル</h1>
+
+<div id="game"></div>
+
+<button onclick="spawnCat()">にゃんこ出撃</button>
+
+<script>
+
+let game = document.getElementById("game");
+let enemies = [];
+
+function spawnCat(){
+
+    let cat = document.createElement("div");
+    cat.className="cat";
+    cat.innerHTML="🐱";
+    game.appendChild(cat);
+
+}
+
+function spawnEnemy(){
+
+    let enemy = document.createElement("div");
+    enemy.className="enemy";
+    enemy.innerHTML="🐶";
+
+    let x = 760;
+    enemy.style.left = x + "px";
+
+    game.appendChild(enemy);
+
+    enemies.push({element:enemy,x:x});
+}
+
+setInterval(spawnEnemy,3000);
+
+function moveEnemies(){
+
+    enemies.forEach(e=>{
+        e.x -= 2;
+        e.element.style.left = e.x + "px";
+    });
+
+}
+
+setInterval(moveEnemies,30);
+
+</script>
+
+</body>
+</html>
